@@ -22,10 +22,6 @@ Created this mod for two reasons:
 
 ### Instructions for those that want to try it out!
 
-Well you'll have to build it yourself, I use VS Code, but the csproj is here for you to use with VS Code or Visual Studio. Either or, you can figure that part out.
-
-Once you've built the mod, you'll need to be in creative. First grab a couple of Trading Posts. Then grab a stack of Unwritten Parchment (traderoutesdeluxe:post_parchment_unwritten).
-
 Place down your first Trading Post. Right click with the unwritten parchment while sneaking. This will give you a Written Parchment - which is basically a network ID attached to an Item.
 
 Place down your second, or third, or theoretically 100th trading post. Right click while sneaking and holding the written parchment. This will "sync" this blocks inventory with the network.
