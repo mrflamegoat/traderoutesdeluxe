@@ -26,7 +26,7 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
 
         public string DialogTitle
         {
-            get { return Lang.Get("Trading Post"); }
+            get { return Lang.Get("block-tradingpost"); }
         }
 
         public override InventoryBase Inventory

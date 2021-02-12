@@ -1,4 +1,5 @@
 {
-	"block-tradingpost": "Trading Post"
-	
+	"block-tradingpost": "Trading Post",
+	"item-post_parchment_unwritten": "Unwritten Parchment",
+	"item-post_parchment_written": "Written Parchment"
 }
