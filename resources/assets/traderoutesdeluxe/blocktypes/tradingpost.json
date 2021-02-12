@@ -1,0 +1,15 @@
+{
+	"code": "tradingpost",
+	"class": "BlockTradingPost",
+	"entityClass": "BlockEntityTradingPost",
+	"blockmaterial": "wood",
+	"creativeinventory": { "general": ["*"] },
+	"maxstacksize": 1,
+	"textures": {
+		"all": { "base": "block/tradingpost" }
+	},
+	"sounds": {
+		"place": "game:block/plant",
+		"break": "game:block/plant"
+	}
+} 

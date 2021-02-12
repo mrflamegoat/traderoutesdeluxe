@@ -1,0 +1,21 @@
+{
+    "code": "post_parchment_written",
+    "class": "ItemPostParchmentWritten",
+    "texture": {
+        "base": "item/post_parchment_written"
+    },
+    "creativeinventory": {
+        "general": [
+            "*"
+        ],
+        "items": [
+            "*"
+        ]
+    },
+    "maxstacksize": 1,
+    "materialDensity": 620,
+    "combustibleProps": {
+        "burnTemperature": 400,
+        "burnDuration": 96
+    }
+}

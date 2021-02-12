@@ -1,0 +1,21 @@
+{
+    "code": "post_parchment_unwritten",
+    "class": "ItemPostParchmentUnwritten",
+    "texture": {
+        "base": "item/post_parchment_unwritten"
+    },
+    "creativeinventory": {
+        "general": [
+            "*"
+        ],
+        "items": [
+            "*"
+        ]
+    },
+    "maxstacksize": 64,
+    "materialDensity": 620,
+    "combustibleProps": {
+        "burnTemperature": 400,
+        "burnDuration": 96
+    }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "code",
+  "name": "TradeRoutesDeluxe",
+  "description": "Allows you to create Trade Routes between Trading Posts for automated item delivery.",
+  "author": "MrFlamegoat",
+  "version": "0.0.1-alpha",
+  "dependency": {
+    "game": "1.14"
+  },
+  "website": "https://www.twitch.tv/flamegoat"
+}
