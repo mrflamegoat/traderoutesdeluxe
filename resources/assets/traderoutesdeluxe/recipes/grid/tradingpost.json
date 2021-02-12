@@ -1,0 +1,28 @@
+{
+    "ingredientPattern": "III,IWI,III",
+    "ingredients": {
+        "I": {
+            "type": "item",
+            "code": "game:metalplate-*"
+        },
+        "W": {
+            "type": "block",
+            "code": "game:planks-*",
+            "allowedVariants": [
+                "birch",
+                "oak",
+                "maple",
+                "pine",
+                "acacia",
+                "kapok",
+                "aged"
+            ]
+        }
+    },
+    "width": 3,
+    "height": 3,
+    "output": {
+        "type": "block",
+        "code": "tradingpost"
+    }
+}
