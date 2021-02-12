@@ -256,15 +256,8 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
 
         protected void SyncToNetworkInventory()
         {
-            List<ItemSlot> slots = new List<ItemSlot>();
-
-            foreach (ItemSlot slot in Inventory)
-            {
-                slots.Add(slot);
-            }
-
             TreeAttribute tree = new TreeAttribute();
-            Inventory.SlotsToTreeAttributes(slots.ToArray(), tree);
+            Inventory.ToTreeAttributes(tree);
             Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.SyncInventories(this.blockEnityId, this.networkId, tree.ToBytes());
         }
 

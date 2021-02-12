@@ -36,6 +36,10 @@ Thanks for reading!
 
 You don't know me, but huge shoutout to Tyron for Vintage Story and to [copygirl](https://github.com/copygirl) for an excellent VS Code tutorial to get up and running with.
 
+## Contact Me
+
+Find me over on [Twitter](https://www.twitter.com/mrflamegoat) - I pretty much only communicate in 240 characters or less. Or feel free to file an issue.
+
 ### Note on the licensing
 
 I've licensed my explicit code as MIT, you're free to do whatever you want with it. Use it, steal it, run around and thow it at people. It's crap, so I don't care what you do with it. That being said, a lot of it is powered by tutorials and information gathered from a variety of resources. So if you're going to use it, maybe think about contributing back by uploading your work, too.
