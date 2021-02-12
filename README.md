@@ -17,7 +17,7 @@ Created this mod for two reasons:
 
 ## Currently Not Implemented List of Things
 
-1. There's no recipes, so you can't craft anything yet.
+1. ~~There's no recipes, so you can't craft anything yet.~~ There is now!
 2. Literally everything else.
 
 ### Instructions for those that want to try it out!
