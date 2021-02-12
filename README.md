@@ -2,7 +2,7 @@
 
 This is a mod I'm writing for Vintage Story. At the moment it's a poor mans Ender Chest (if you're familiar with Minecraft mods, which you are, I'm sure) but I have big plans! Big big plans!
 
-Craeted this mod for two reasons:
+Created this mod for two reasons:
 
 1. I really like Vintage Story.
 2. I really needed to learn C#, just because!
