@@ -5,10 +5,10 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
-namespace TradeRoutesDeluxe
-{
-    public class TradeRoutesSystem : ModSystem
-    {
+namespace TradeRoutesDeluxe {
+
+    public class TradeRoutesSystem : ModSystem {
+
         public static string MOD_ID = "traderoutesdeluxe";
 
         // Client
@@ -22,18 +22,15 @@ namespace TradeRoutesDeluxe
         // Common
         public TradeRoutesHandler TradeRoutesHandler { get; private set; }
 
-        public override bool ShouldLoad(EnumAppSide side)
-        {
+        public override bool ShouldLoad(EnumAppSide side) {
             return true;
         }
 
-        public override void Start(ICoreAPI api)
-        {
+        public override void Start(ICoreAPI api) {
             TradeRoutesHandler = new TradeRoutesHandler(this);
         }
 
-        public override void StartClientSide(ICoreClientAPI api)
-        {
+        public override void StartClientSide(ICoreClientAPI api) {
             ClientAPI = api;
             ClientChannel = api.Network.RegisterChannel(MOD_ID)
                 .RegisterMessageType<TradingPostNetwork>()
@@ -43,8 +40,7 @@ namespace TradeRoutesDeluxe
             TradeRoutesHandler.InitClient();
         }
 
-        public override void StartServerSide(ICoreServerAPI api)
-        {
+        public override void StartServerSide(ICoreServerAPI api) {
             ServerAPI = api;
             ServerChannel = api.Network.RegisterChannel(MOD_ID)
                 .RegisterMessageType<TradingPostNetwork>()

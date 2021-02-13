@@ -1,11 +1,11 @@
 using ProtoBuf;
 using System.Collections.Generic;
 
-namespace TradeRoutesDeluxe.Common.Network
-{
+namespace TradeRoutesDeluxe.Common.Network {
+
     [ProtoContract]
-    public class TradingPostNetwork
-    {
+    public class TradingPostNetwork {
+
         [ProtoMember(1)]
         public string NetworkId;
 

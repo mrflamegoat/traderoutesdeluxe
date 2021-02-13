@@ -9,12 +9,11 @@ using Vintagestory.API.Common;
     Authors = new[] { "MrFlamegoat" })]
 [assembly: ModDependency("game", "1.14.7")]
 
-namespace TradeRoutesDeluxe
-{
-    public class TradeRoutesMod : ModSystem
-    {
-        public override void Start(ICoreAPI api)
-        {
+namespace TradeRoutesDeluxe {
+
+    public class TradeRoutesMod : ModSystem {
+
+        public override void Start(ICoreAPI api) {
             base.Start(api);
 
             api.RegisterItemClass("ItemPostParchmentUnwritten", typeof(ItemPostParchmentUnwritten));

@@ -2,15 +2,15 @@ using System.IO;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 
-namespace TradeRoutesDeluxe.Common.Utils
-{
-    public static class ByteBuilder
-    {
-        public static byte[] InventoryByteBuilder(IInventory incomingInventory, string blockName, string dialogTitle)
-        {
+namespace TradeRoutesDeluxe.Common.Utils {
+
+    public static class ByteBuilder {
+
+        public static byte[] InventoryByteBuilder(IInventory incomingInventory, string blockName, string dialogTitle) {
+
             byte[] byteInventory;
-            using (MemoryStream ms = new MemoryStream())
-            {
+
+            using (MemoryStream ms = new MemoryStream()) {
                 BinaryWriter writer = new BinaryWriter(ms);
                 writer.Write(blockName);
                 writer.Write(dialogTitle);
