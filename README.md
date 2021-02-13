@@ -32,6 +32,28 @@ I have not done any profiling, server testing, network testing, or load testing 
 
 Thanks for reading!
 
+## Style Notice
+
+No new line brackets! If you're using Omnisharp, here's my current omnisharp.json:
+
+```json
+{
+	"FormattingOptions": {
+		"NewLinesForBracesInLambdaExpressionBody": false,
+		"NewLinesForBracesInAnonymousMethods": false,
+		"NewLinesForBracesInAnonymousTypes": false,
+		"NewLinesForBracesInControlBlocks": false,
+		"NewLinesForBracesInTypes": false,
+		"NewLinesForBracesInMethods": false,
+        "NewLinesForBracesInProperties": false,
+        "NewLinesForBracesInAccessors": false,
+		"NewLineForElse": false,
+		"NewLineForCatch": false,
+		"NewLineForFinally": false
+	}
+}
+```
+
 ## Shoutouts
 
 You don't know me, but huge shoutout to Tyron for Vintage Story and to [copygirl](https://github.com/copygirl) for an excellent VS Code tutorial to get up and running with.
