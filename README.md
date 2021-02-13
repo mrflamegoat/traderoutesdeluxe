@@ -45,8 +45,8 @@ No new line brackets! If you're using Omnisharp, here's my current omnisharp.jso
 		"NewLinesForBracesInControlBlocks": false,
 		"NewLinesForBracesInTypes": false,
 		"NewLinesForBracesInMethods": false,
-        "NewLinesForBracesInProperties": false,
-        "NewLinesForBracesInAccessors": false,
+		"NewLinesForBracesInProperties": false,
+		"NewLinesForBracesInAccessors": false,
 		"NewLineForElse": false,
 		"NewLineForCatch": false,
 		"NewLineForFinally": false
