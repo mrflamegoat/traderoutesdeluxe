@@ -15,11 +15,11 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
     public class BlockEntityTradingPost : BlockEntityGenericContainer
     {
 
+        private string blockEnityId;
+
         internal InventoryGeneric inventory;
 
         private string networkId;
-
-        private string blockEnityId;
 
         public string DialogTitle
         {
@@ -36,9 +36,7 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
             get { return inventoryClassName; }
         }
 
-        public BlockEntityTradingPost() : base()
-        {
-        }
+        public BlockEntityTradingPost() : base() { }
 
         public override void Initialize(ICoreAPI api)
         {
@@ -161,19 +159,7 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
             {
                 if (this.networkId != null && Api.World is IServerWorldAccessor)
                 {
-                    // Note to self: This is exactly how they do it in SurvivalMod - but surely I can write a helper for this.
-                    byte[] localInventory;
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        BinaryWriter writer = new BinaryWriter(ms);
-                        writer.Write("BlockEntityTradingPost");
-                        writer.Write(DialogTitle);
-                        writer.Write((byte)4);
-                        TreeAttribute tree = new TreeAttribute();
-                        this.inventory.ToTreeAttributes(tree);
-                        tree.ToBytes(writer);
-                        localInventory = ms.ToArray();
-                    }
+                    byte[] localInventory = ByteBuilder.InventoryByteBuilder(this.inventory, "BlockEntityTradingPost", DialogTitle);
 
                     ((ICoreServerAPI)Api).Network.SendBlockEntityPacket(
                         (IServerPlayer)byPlayer,
