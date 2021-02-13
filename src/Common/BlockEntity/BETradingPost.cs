@@ -1,14 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using ProtoBuf;
 using TradeRoutesDeluxe.Common.Items;
 using TradeRoutesDeluxe.Common.Network;
 using Vintagestory.API.Server;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
-using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 using TradeRoutesDeluxe.Common.Utils;
 
@@ -216,16 +213,21 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
             base.OnReceivedServerPacket(packetid, data);
         }
 
-        private void handleNeutralPackets(int packetid, byte[] data)
+        public override void OnBlockBroken()
         {
-            switch (packetid)
-            {
-                case (int)EnumTradingPostPackets.SyncInventory:
-                    this.SyncFromNetworkInventory(Api, data);
-                    break;
-                default:
-                    break;
-            }
+            Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.RemoveTradingPost(this.blockEnityId, this.networkId);
+
+            // The blockentities local storage is just to make syncing easier and cleaner. It does not
+            // delete the network storage.
+            Inventory.DiscardAll();
+
+            base.OnBlockBroken();
+        }
+
+        private void OnSlotModified(int slot)
+        {
+            Api.World.BlockAccessor.GetChunkAtBlockPos(this.Pos)?.MarkModified();
+            this.SyncToNetworkInventory();
         }
 
         private void InitInventory(Block Block)
@@ -236,6 +238,18 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
             inventory.OnInventoryClosed += OnInvClosed;
             inventory.OnInventoryOpened += OnInvOpened;
             inventory.SlotModified += OnSlotModified;
+        }
+
+        private void handleNeutralPackets(int packetid, byte[] data)
+        {
+            switch (packetid)
+            {
+                case (int)EnumTradingPostPackets.SyncInventory:
+                    this.SyncFromNetworkInventory(Api, data);
+                    break;
+                default:
+                    break;
+            }
         }
 
         // Pass API here because we attempt to use this before it's initialized to the blockentity.
@@ -259,23 +273,6 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
             TreeAttribute tree = new TreeAttribute();
             Inventory.ToTreeAttributes(tree);
             Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.SyncInventories(this.blockEnityId, this.networkId, tree.ToBytes());
-        }
-
-        private void OnSlotModified(int slot)
-        {
-            Api.World.BlockAccessor.GetChunkAtBlockPos(this.Pos)?.MarkModified();
-            this.SyncToNetworkInventory();
-        }
-
-        public override void OnBlockBroken()
-        {
-            Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.RemoveTradingPost(this.blockEnityId, this.networkId);
-
-            // The blockentities local storage is just to make syncing easier and cleaner. It does not
-            // delete the network storage.
-            Inventory.DiscardAll();
-
-            base.OnBlockBroken();
         }
     }
 }

@@ -29,7 +29,6 @@ namespace TradeRoutesDeluxe
 
         public override void Start(ICoreAPI api)
         {
-
             TradeRoutesHandler = new TradeRoutesHandler(this);
         }
 

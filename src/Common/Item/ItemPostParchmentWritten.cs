@@ -1,15 +1,12 @@
-using System;
 using System.Text;
 using Vintagestory.API.Common;
-using Vintagestory.API.Datastructures;
 
 namespace TradeRoutesDeluxe.Common.Items
 {
     public class ItemPostParchmentWritten : Item
     {
-        public ItemPostParchmentWritten()
-        {
-        }
+        public ItemPostParchmentWritten() { }
+
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);

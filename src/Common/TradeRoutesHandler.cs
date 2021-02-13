@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Vintagestory.API.Server;
 using TradeRoutesDeluxe.Common.Network;
@@ -29,47 +28,7 @@ namespace TradeRoutesDeluxe.Common
         {
             System.ServerAPI.Event.SaveGameLoaded += OnSaveGameLoaded;
             System.ServerAPI.Event.GameWorldSave += OnGameGettingSaved;
-            System.ServerAPI.Event.PlayerJoin += onPlayerJoin;
-        }
-
-        private void OnNetworkCreation(TradingPostNetwork incomingNetwork)
-        {
-            if (this.networks.ContainsKey(incomingNetwork.NetworkId))
-            {
-                this.networks[incomingNetwork.NetworkId] = incomingNetwork;
-                return;
-            }
-            this.networks.Add(incomingNetwork.NetworkId, incomingNetwork);
-        }
-
-        private void OnNetworksLoad(Dictionary<string, TradingPostNetwork> networksFromSave)
-        {
-            this.networks = networksFromSave;
-        }
-
-        public byte[] GetTree(string networkId)
-        {
-            if (this.networks.ContainsKey(networkId)) return this.networks[networkId].slots ?? null;
-            return null;
-        }
-
-        public void SyncInventories(string originBlockId, string networkId, byte[] slotBytes)
-        {
-            if (!this.networks.ContainsKey(networkId)) return;
-
-            this.networks[networkId].slots = slotBytes;
-            foreach (KeyValuePair<string, TradingPostLocation> location in this.networks[networkId].Locations)
-            {
-                if (location.Value.PostId == originBlockId || slotBytes == null) continue;
-                if (System.ClientAPI != null)
-                {
-                    System.ClientAPI.Network.SendBlockEntityPacket(location.Value.BlockPosition.X, location.Value.BlockPosition.Y, location.Value.BlockPosition.Z, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
-                }
-                else
-                {
-                    System.ServerAPI.Network.BroadcastBlockEntityPacket(location.Value.BlockPosition.X, location.Value.BlockPosition.Y, location.Value.BlockPosition.Z, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
-                }
-            };
+            System.ServerAPI.Event.PlayerJoin += OnPlayerJoin;
         }
 
         public string CreateOrAddLocation(IServerPlayer forPlayer, TradingPostLocation tradePosLoc, string networkId = null)
@@ -107,14 +66,54 @@ namespace TradeRoutesDeluxe.Common
             }
         }
 
-        private void onPlayerJoin(IServerPlayer byPlayer)
+        public void SyncInventories(string originBlockId, string networkId, byte[] slotBytes)
         {
-            System.ServerChannel.SendPacket<Dictionary<string, TradingPostNetwork>>(this.networks, byPlayer);
+            if (!this.networks.ContainsKey(networkId)) return;
+
+            this.networks[networkId].slots = slotBytes;
+            foreach (KeyValuePair<string, TradingPostLocation> location in this.networks[networkId].Locations)
+            {
+                if (location.Value.PostId == originBlockId || slotBytes == null) continue;
+                if (System.ClientAPI != null)
+                {
+                    System.ClientAPI.Network.SendBlockEntityPacket(location.Value.BlockPosition.X, location.Value.BlockPosition.Y, location.Value.BlockPosition.Z, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
+                }
+                else
+                {
+                    System.ServerAPI.Network.BroadcastBlockEntityPacket(location.Value.BlockPosition.X, location.Value.BlockPosition.Y, location.Value.BlockPosition.Z, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
+                }
+            };
+        }
+
+        public byte[] GetTree(string networkId)
+        {
+            if (this.networks.ContainsKey(networkId)) return this.networks[networkId].slots ?? null;
+            return null;
+        }
+
+        private void OnNetworkCreation(TradingPostNetwork incomingNetwork)
+        {
+            if (this.networks.ContainsKey(incomingNetwork.NetworkId))
+            {
+                this.networks[incomingNetwork.NetworkId] = incomingNetwork;
+                return;
+            }
+            this.networks.Add(incomingNetwork.NetworkId, incomingNetwork);
+        }
+
+        private void OnNetworksLoad(Dictionary<string, TradingPostNetwork> networksFromSave)
+        {
+            this.networks = networksFromSave;
         }
 
         private void OnGameGettingSaved()
         {
             System.ServerAPI.WorldManager.SaveGame.StoreData("tradingPostNetworksList", SerializerUtil.Serialize(this.networks));
+        }
+
+        private void OnPlayerJoin(IServerPlayer byPlayer)
+        {
+            System.ServerChannel.SendPacket<Dictionary<string, TradingPostNetwork>>(this.networks, byPlayer);
         }
 
         private void OnSaveGameLoaded()

@@ -1,5 +1,4 @@
-﻿using System;
-using TradeRoutesDeluxe.Common.BlockEntities;
+﻿using TradeRoutesDeluxe.Common.BlockEntities;
 using TradeRoutesDeluxe.Common.Blocks;
 using TradeRoutesDeluxe.Common.Items;
 using Vintagestory.API.Common;
