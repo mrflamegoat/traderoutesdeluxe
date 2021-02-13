@@ -57,9 +57,6 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
             {
                 // Block exists and has a network, load up it's inventory.
                 this.SyncFromNetworkInventory(api);
-
-                // Probably not required.
-                MarkDirty();
             }
 
             base.Initialize(api);
@@ -103,7 +100,6 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
                     hotbarSlot.TakeOut(1);
                     hotbarSlot.MarkDirty();
 
-                    // All on the server, it'll communicate back to the client for updates.
                     if (byPlayer.Entity.World is IServerWorldAccessor)
                     {
                         if (this.networkId == null)
@@ -127,8 +123,6 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
                             byPlayer.Entity.World.SpawnItemEntity(stack, byPlayer.Entity.Pos.XYZ.Add(0, 0.5, 0));
                         }
 
-                        MarkDirty();
-
                         return true;
                     }
                 }
@@ -147,10 +141,6 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
                     }
 
                     this.SyncFromNetworkInventory(Api);
-
-                    // Probably redundant, but for whatever reason, this makes the client/server interaction seem more "smooth".
-                    // Shut up. Anecdotal is good enough for me!
-                    MarkDirty();
 
                     return true;
                 }
@@ -177,12 +167,9 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
 
         public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
         {
-            // Theoretically, you don't need to do this - it seems MakeDirty attempts to refresh the client but I can't
-            // get the client to recognize the item slot changes no matter what I do. So... double duty!
             if (packetid == (int)EnumTradingPostPackets.SyncInventory)
             {
                 handleNeutralPackets(packetid, data);
-                MarkDirty();
             }
 
             base.OnReceivedClientPacket(player, packetid, data);
@@ -202,9 +189,6 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
         public override void OnBlockBroken()
         {
             Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.RemoveTradingPost(this.blockEnityId, this.networkId);
-
-            // The blockentities local storage is just to make syncing easier and cleaner. It does not
-            // delete the network storage.
             Inventory.DiscardAll();
 
             base.OnBlockBroken();
@@ -219,11 +203,11 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
         private void InitInventory(Block Block)
         {
             // Ripped right out of the SurvivalMod code.
-            inventory = new InventoryGeneric(quantitySlots, null, null, null);
+            this.inventory = new InventoryGeneric(quantitySlots, null, null, null);
 
-            inventory.OnInventoryClosed += OnInvClosed;
-            inventory.OnInventoryOpened += OnInvOpened;
-            inventory.SlotModified += OnSlotModified;
+            this.inventory.OnInventoryClosed += OnInvClosed;
+            this.inventory.OnInventoryOpened += OnInvOpened;
+            this.inventory.SlotModified += OnSlotModified;
         }
 
         private void handleNeutralPackets(int packetid, byte[] data)
@@ -244,13 +228,10 @@ namespace TradeRoutesDeluxe.Common.BlockEntities
             byte[] serializedItems = data ?? null;
             if (serializedItems == null)
             {
-                // Attempt to retrieve it manually. Good for force loading.
                 serializedItems = api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.GetTree(this.networkId);
             }
             if (serializedItems == null) return;
 
-            // I originally wrote this in a long hand for loop to overwrite the slots.
-            // 30+ hours into reading through code and writing tests - learned you could just do this.
             Inventory.FromTreeAttributes(TreeAttribute.CreateFromBytes(serializedItems));
         }
 

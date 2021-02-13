@@ -87,8 +87,7 @@ namespace TradeRoutesDeluxe.Common
 
         public byte[] GetTree(string networkId)
         {
-            if (this.networks.ContainsKey(networkId)) return this.networks[networkId].slots ?? null;
-            return null;
+            return this.networks?[networkId]?.slots ?? null;
         }
 
         private void OnNetworkCreation(TradingPostNetwork incomingNetwork)
