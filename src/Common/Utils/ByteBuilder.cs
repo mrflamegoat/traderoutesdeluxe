@@ -1,8 +1,6 @@
 using System.IO;
-using ProtoBuf;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
-using Vintagestory.API.Util;
 
 namespace TradeRoutesDeluxe.Common.Utils
 {
