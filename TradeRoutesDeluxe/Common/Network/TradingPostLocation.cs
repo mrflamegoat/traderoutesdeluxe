@@ -11,5 +11,8 @@ namespace TradeRoutesDeluxe.Common.Network {
 
         [ProtoMember(2)]
         public BlockPos BlockPosition;
+
+        [ProtoMember(3)]
+        public bool Insulated;
     }
 }

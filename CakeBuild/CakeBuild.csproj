@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <Reference Include="VintagestoryAPI">
-      <HintPath>$(VintagestoryDir)\VintagestoryAPI.dll</HintPath>
+      <HintPath>$(VintagestoryDir)/VintagestoryAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
 

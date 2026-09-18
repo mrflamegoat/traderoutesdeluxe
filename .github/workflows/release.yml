@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    branches: [ mainline ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  VS_VERSION: "1.22.7"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Fetch Vintage Story assemblies
+        run: |
+          mkdir -p "$HOME/vs"
+          curl -fsSL "https://cdn.vintagestory.at/gamefiles/stable/vs_server_linux-x64_${VS_VERSION}.tar.gz" -o vs.tar.gz
+          tar -xzf vs.tar.gz -C "$HOME/vs"
+          echo "VINTAGE_STORY=$HOME/vs" >> "$GITHUB_ENV"
+
+      - name: Read mod metadata
+        id: mod
+        run: |
+          echo "version=$(jq -r .version TradeRoutesDeluxe/modinfo.json)" >> "$GITHUB_OUTPUT"
+          echo "modid=$(jq -r .modid TradeRoutesDeluxe/modinfo.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if release already exists
+        id: exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "v${{ steps.mod.outputs.version }}" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Package
+        if: steps.exists.outputs.skip == 'false'
+        run: bash build.sh
+
+      - name: Create release
+        if: steps.exists.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.mod.outputs.version }}" \
+            Releases/*.zip \
+            --title "v${{ steps.mod.outputs.version }}" \
+            --generate-notes

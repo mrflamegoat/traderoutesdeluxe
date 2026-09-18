@@ -12,6 +12,10 @@ namespace TradeRoutesDeluxe.Common {
 
         public const string InventoryClassName = "traderoutespost";
 
+        public const float DefaultPerishRate = 1f;
+
+        public const float InsulatedPerishRate = 0.5f;
+
         private TradeRoutesSystem System { get; } = system;
 
         Dictionary<string, TradingPostNetwork> networks = [];
@@ -84,6 +88,30 @@ namespace TradeRoutesDeluxe.Common {
             return value.Locations.Count == 0;
         }
 
+        public float GetPerishRateFor(string networkId) {
+            if (networkId == null || !networks.TryGetValue(networkId, out TradingPostNetwork value)) return DefaultPerishRate;
+
+            Dictionary<string, TradingPostLocation> locations = value.Locations;
+            if (locations == null || locations.Count == 0) return DefaultPerishRate;
+
+            foreach (KeyValuePair<string, TradingPostLocation> location in locations) {
+                if (!location.Value.Insulated) return DefaultPerishRate;
+            }
+
+            return InsulatedPerishRate;
+        }
+
+        public void SetLocationInsulated(string networkId, string postId, bool insulated) {
+            if (networkId == null || postId == null) return;
+            if (!networks.TryGetValue(networkId, out TradingPostNetwork network)) return;
+            if (!network.Locations.TryGetValue(postId, out TradingPostLocation location)) return;
+            if (location.Insulated == insulated) return;
+
+            location.Insulated = insulated;
+
+            System.ServerChannel?.BroadcastPacket(network);
+        }
+
         public void DeleteNetwork(string networkId) {
             if (networkId == null) return;
 
@@ -103,7 +131,7 @@ namespace TradeRoutesDeluxe.Common {
         private void OnGameGettingSaved() {
             System.ServerAPI.WorldManager.SaveGame.StoreData("tradingPostNetworksList", SerializerUtil.Serialize(networks));
 
-            Dictionary<string, byte[]> contents = [with(storedContents)];
+            Dictionary<string, byte[]> contents = new(storedContents);
 
             foreach (KeyValuePair<string, InventoryGeneric> inventory in inventories) {
                 TreeAttribute tree = new();

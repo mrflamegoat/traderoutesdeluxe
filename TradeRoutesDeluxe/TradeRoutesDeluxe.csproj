@@ -15,24 +15,24 @@
 
   <Target Name="CheckVintageStory" BeforeTargets="BeforeBuild">
     <Error Condition="'$(VintagestoryDir)' == ''" Text="Set the VINTAGE_STORY environment variable to your Vintage Story install directory." />
-    <Error Condition="!Exists('$(VintagestoryDir)\VintagestoryAPI.dll')" Text="VintagestoryAPI.dll not found under '$(VintagestoryDir)'." />
+    <Error Condition="!Exists('$(VintagestoryDir)/VintagestoryAPI.dll')" Text="VintagestoryAPI.dll not found under '$(VintagestoryDir)'." />
   </Target>
 
   <ItemGroup>
     <Reference Include="VintagestoryAPI">
-      <HintPath>$(VintagestoryDir)\VintagestoryAPI.dll</HintPath>
+      <HintPath>$(VintagestoryDir)/VintagestoryAPI.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="VSEssentials">
-      <HintPath>$(VintagestoryDir)\Mods\VSEssentials.dll</HintPath>
+      <HintPath>$(VintagestoryDir)/Mods/VSEssentials.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="VSSurvivalMod">
-      <HintPath>$(VintagestoryDir)\Mods\VSSurvivalMod.dll</HintPath>
+      <HintPath>$(VintagestoryDir)/Mods/VSSurvivalMod.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="protobuf-net">
-      <HintPath>$(VintagestoryDir)\Lib\protobuf-net.dll</HintPath>
+      <HintPath>$(VintagestoryDir)/Lib/protobuf-net.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

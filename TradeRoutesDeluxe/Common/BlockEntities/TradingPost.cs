@@ -17,12 +17,23 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
         private string blockEnityId;
         private string networkId;
 
+        private bool insulated;
+
+        private string upgradeItem;
+
+        private string upgradeBlock;
+
         private InventoryGeneric unlinkedInventory;
 
         private InventoryBase subscribedInventory;
 
-        public static string DialogTitle {
-            get { return Lang.Get("block-tradingpost"); }
+        public string DialogTitle {
+            get {
+                string blockName = Lang.Get(Block.Code.Domain + ":block-" + Block.Code.Path);
+                if (networkId == null) return blockName;
+
+                return Lang.Get(Block.Code.Domain + ":traderoute-dialogtitle", blockName, WrittenParchment.ShortNetworkId(networkId));
+            }
         }
 
         public override InventoryBase Inventory {
@@ -46,12 +57,16 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
 
         public BlockEntityTradingPost() : base() {
             unlinkedInventory = new InventoryGeneric(quantitySlots, null, null, null);
+            container = new TradingPostContainer(() => Inventory, "inventory", GetNetworkPerishRate);
         }
 
         public override void Initialize(ICoreAPI api) {
             if (Block?.Attributes != null) {
                 inventoryClassName = Block.Attributes["inventoryClassName"].AsString(inventoryClassName);
                 quantitySlots = Block.Attributes["quantitySlots"].AsInt(quantitySlots);
+                insulated = Block.Attributes["insulated"].AsBool(insulated);
+                upgradeItem = Block.Attributes["upgradeItem"].AsString(upgradeItem);
+                upgradeBlock = Block.Attributes["upgradeBlock"].AsString(upgradeBlock);
 
                 if (unlinkedInventory.Count != quantitySlots && unlinkedInventory.Empty) {
                     unlinkedInventory = new InventoryGeneric(quantitySlots, null, null, null);
@@ -94,12 +109,13 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
             if (byPlayer?.Entity?.Controls?.Sneak == true) {
                 ItemSlot hotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
-                if (hotbarSlot?.Itemstack?.Item is ItemPostParchmentUnwritten) {
+                if (hotbarSlot?.Itemstack?.Item is BlankParchment) {
                     if (byPlayer.Entity.World is IServerWorldAccessor) {
                         if (networkId == null) {
                             TradingPostLocation post = new() {
                                 PostId = blockEnityId,
-                                BlockPosition = blockSel.Position
+                                BlockPosition = blockSel.Position,
+                                Insulated = insulated
                             };
 
                             LinkToNetwork(Handler.CreateOrAddLocation(byPlayer as IServerPlayer, post));
@@ -110,7 +126,7 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
                         hotbarSlot.TakeOut(1);
                         hotbarSlot.MarkDirty();
 
-                        ItemPostParchmentWritten writtenPaper = byPlayer.Entity.World.GetItem(new AssetLocation("traderoutesdeluxe:post_parchment_written")) as ItemPostParchmentWritten;
+                        WrittenParchment writtenPaper = byPlayer.Entity.World.GetItem(new AssetLocation("traderoutesdeluxe:post_parchment_written")) as WrittenParchment;
 
                         ItemStack stack = new(writtenPaper, 1);
                         stack.Attributes.SetString("networkId", networkId);
@@ -123,14 +139,29 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
                     return true;
                 }
 
-                if (hotbarSlot?.Itemstack?.Item is ItemPostParchmentWritten) {
+                if (CanUpgradeWith(hotbarSlot)) {
+                    if (byPlayer.Entity.World is IServerWorldAccessor) {
+                        Block upgraded = Api.World.GetBlock(new AssetLocation(upgradeBlock));
+                        if (upgraded == null) return false;
+
+                        hotbarSlot.TakeOut(1);
+                        hotbarSlot.MarkDirty();
+
+                        Api.World.BlockAccessor.ExchangeBlock(upgraded.BlockId, Pos);
+                    }
+
+                    return true;
+                }
+
+                if (hotbarSlot?.Itemstack?.Item is WrittenParchment) {
                     string incomingNetworkId = hotbarSlot.Itemstack.Attributes.GetString("networkId");
                     if (incomingNetworkId == null) return false;
 
                     if (byPlayer.Entity.World is IServerWorldAccessor) {
                         TradingPostLocation post = new() {
                             PostId = blockEnityId,
-                            BlockPosition = blockSel.Position
+                            BlockPosition = blockSel.Position,
+                            Insulated = insulated
                         };
 
                         string joinedNetworkId = Handler.CreateOrAddLocation(byPlayer as IServerPlayer, post, incomingNetworkId);
@@ -216,8 +247,39 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
 
         }
 
+        public override void OnReceivedServerPacket(int packetid, byte[] data) {
+            if (packetid == (int)EnumBlockContainerPacketId.OpenInventory && invDialog?.IsOpened() == false) {
+                invDialog.Dispose();
+                invDialog = null;
+            }
+
+            base.OnReceivedServerPacket(packetid, data);
+        }
+
+        public override void OnExchanged(Block block) {
+            base.OnExchanged(block);
+
+            insulated = Block?.Attributes?["insulated"].AsBool(false) ?? false;
+
+            Handler?.SetLocationInsulated(networkId, blockEnityId, insulated);
+        }
+
+        private bool CanUpgradeWith(ItemSlot slot) {
+            if (insulated || upgradeItem == null || upgradeBlock == null) return false;
+
+            return slot?.Itemstack?.Collectible?.Code?.Path?.StartsWith(upgradeItem) == true;
+        }
+
+        private float GetNetworkPerishRate() {
+            if (networkId == null) return TradeRoutesHandler.DefaultPerishRate;
+
+            return Handler?.GetPerishRateFor(networkId) ?? TradeRoutesHandler.DefaultPerishRate;
+        }
+
         private void DetachFromNetwork() {
             UnsubscribeCurrent();
+
+            (container as TradingPostContainer)?.StopAffectingInventory();
         }
 
         private void SubscribeTo(InventoryBase inventory) {

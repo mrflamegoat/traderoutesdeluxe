@@ -1,5 +1,9 @@
 {
-	"block-tradingpost": "Trading Post",
-	"item-post_parchment_unwritten": "Unwritten Parchment",
-	"item-post_parchment_written": "Written Parchment"
+    "block-tradingpost": "Trading Post",
+    "block-furlined_tradingpost": "Fur-Lined Trading Post",
+    "item-post_parchment_unwritten": "Blank Parchment",
+    "item-post_parchment_written": "Trade Route",
+    "item-traderoute-named": "Trade Route {0}",
+    "traderoute-networkid": "Network: {0}",
+    "traderoute-dialogtitle": "{0}: {1}"
 }

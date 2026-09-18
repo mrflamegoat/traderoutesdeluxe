@@ -1,6 +1,6 @@
 {
     "code": "post_parchment_written",
-    "class": "ItemPostParchmentWritten",
+    "class": "WrittenParchment",
     "texture": {
         "base": "item/post_parchment_written"
     },

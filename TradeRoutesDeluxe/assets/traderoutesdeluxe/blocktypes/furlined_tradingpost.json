@@ -1,5 +1,5 @@
 {
-    "code": "tradingpost",
+    "code": "furlined_tradingpost",
     "class": "BlockTradingPost",
     "entityClass": "BlockEntityTradingPost",
     "blockmaterial": "wood",
@@ -9,7 +9,7 @@
     "maxstacksize": 1,
     "textures": {
         "horizontals": {
-            "base": "block/tradingpost"
+            "base": "block/furlined_tradingpost"
         },
         "up": {
             "base": "block/tradingpost-top"
@@ -23,7 +23,6 @@
         "break": "game:block/plant"
     },
     "attributes": {
-        "upgradeItem": "hide-pelt",
-        "upgradeBlock": "traderoutesdeluxe:furlined_tradingpost"
+        "insulated": true
     }
 }

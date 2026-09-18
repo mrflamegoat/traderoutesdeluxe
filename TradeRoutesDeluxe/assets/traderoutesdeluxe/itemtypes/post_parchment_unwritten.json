@@ -1,6 +1,6 @@
 {
     "code": "post_parchment_unwritten",
-    "class": "ItemPostParchmentUnwritten",
+    "class": "BlankParchment",
     "texture": {
         "base": "item/post_parchment_unwritten"
     },
