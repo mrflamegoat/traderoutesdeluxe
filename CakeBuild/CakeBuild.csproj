@@ -7,11 +7,6 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <VintagestoryDir Condition="'$(VINTAGE_STORY)' != ''">$(VINTAGE_STORY)</VintagestoryDir>
-    <VintagestoryDir Condition="'$(VintagestoryDir)' == ''">D:\Games\Vintagestory</VintagestoryDir>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Cake.Frosting" Version="6.1.0" />
     <PackageReference Include="Cake.Json" Version="7.0.1" />
@@ -20,7 +15,7 @@
 
   <ItemGroup>
     <Reference Include="VintagestoryAPI">
-      <HintPath>$(VintagestoryDir)\VintagestoryAPI.dll</HintPath>
+      <HintPath>$(VINTAGE_STORY)\VintagestoryAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
 

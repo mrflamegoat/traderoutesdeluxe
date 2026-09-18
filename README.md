@@ -32,25 +32,46 @@ I have not done any profiling, server testing, network testing, or load testing 
 
 Thanks for reading!
 
+## Building
+
+You'll need:
+
+1. Vintage Story 1.22.7 or later.
+2. The [.NET 10 SDK](https://dotnet.microsoft.com/download).
+
+Set the `VINTAGE_STORY` environment variable to wherever you installed the game. The build reads it to find `VintagestoryAPI.dll` and friends, and it'll stop with an angry message if it can't find it.
+
+```powershell
+[Environment]::SetEnvironmentVariable("VINTAGE_STORY", "C:\path\to\Vintagestory", "User")
+```
+
+Then build and package:
+
+```
+./build.ps1
+```
+
+or `./build.sh` on Linux/macOS. The finished mod zip lands in `Releases/`.
+
 ## Style Notice
 
 No new line brackets! If you're using Omnisharp, here's my current omnisharp.json:
 
 ```json
 {
-	"FormattingOptions": {
-		"NewLinesForBracesInLambdaExpressionBody": false,
-		"NewLinesForBracesInAnonymousMethods": false,
-		"NewLinesForBracesInAnonymousTypes": false,
-		"NewLinesForBracesInControlBlocks": false,
-		"NewLinesForBracesInTypes": false,
-		"NewLinesForBracesInMethods": false,
-		"NewLinesForBracesInProperties": false,
-		"NewLinesForBracesInAccessors": false,
-		"NewLineForElse": false,
-		"NewLineForCatch": false,
-		"NewLineForFinally": false
-	}
+    "FormattingOptions": {
+        "NewLinesForBracesInLambdaExpressionBody": false,
+        "NewLinesForBracesInAnonymousMethods": false,
+        "NewLinesForBracesInAnonymousTypes": false,
+        "NewLinesForBracesInControlBlocks": false,
+        "NewLinesForBracesInTypes": false,
+        "NewLinesForBracesInMethods": false,
+        "NewLinesForBracesInProperties": false,
+        "NewLinesForBracesInAccessors": false,
+        "NewLineForElse": false,
+        "NewLineForCatch": false,
+        "NewLineForFinally": false
+    }
 }
 ```
 

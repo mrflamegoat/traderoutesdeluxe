@@ -5,7 +5,7 @@
             "name": "Launch Client (Debug)",
             "type": "coreclr",
             "request": "launch",
-            "program": "D:/Games/Vintagestory/Vintagestory.exe",
+            "program": "${env:VINTAGE_STORY}/Vintagestory.exe",
             "preLaunchTask": "build",
             "args": [
                 "--tracelog",
@@ -14,7 +14,7 @@
                 "--addOrigin",
                 "${workspaceFolder}/TradeRoutesDeluxe/assets"
             ],
-            "cwd": "D:/Games/Vintagestory",
+            "cwd": "${env:VINTAGE_STORY}",
             "console": "internalConsole",
             "stopAtEntry": false
         },
@@ -22,7 +22,7 @@
             "name": "Launch Server",
             "type": "coreclr",
             "request": "launch",
-            "program": "D:/Games/Vintagestory/VintagestoryServer.exe",
+            "program": "${env:VINTAGE_STORY}/VintagestoryServer.exe",
             "preLaunchTask": "build",
             "args": [
                 "--tracelog",
@@ -31,7 +31,7 @@
                 "--addOrigin",
                 "${workspaceFolder}/TradeRoutesDeluxe/assets"
             ],
-            "cwd": "D:/Games/Vintagestory",
+            "cwd": "${env:VINTAGE_STORY}",
             "console": "internalConsole",
             "stopAtEntry": false
         }
