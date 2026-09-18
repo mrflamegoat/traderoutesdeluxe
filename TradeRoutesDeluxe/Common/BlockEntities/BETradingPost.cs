@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using TradeRoutesDeluxe.Common.Items;
 using TradeRoutesDeluxe.Common.Network;
 using Vintagestory.API.Server;
@@ -126,7 +126,7 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
 
                     ((ICoreServerAPI)Api).Network.SendBlockEntityPacket(
                         (IServerPlayer)byPlayer,
-                        Pos.X, Pos.Y, Pos.Z,
+                        Pos,
                         (int)EnumBlockContainerPacketId.OpenInventory,
                         localInventory
                     );
@@ -155,11 +155,11 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
             base.OnReceivedServerPacket(packetid, data);
         }
 
-        public override void OnBlockBroken() {
+        public override void OnBlockBroken(IPlayer byPlayer = null) {
             Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.RemoveTradingPost(this.blockEnityId, this.networkId);
             Inventory.DiscardAll();
 
-            base.OnBlockBroken();
+            base.OnBlockBroken(byPlayer);
         }
 
         private void OnSlotModified(int slot) {

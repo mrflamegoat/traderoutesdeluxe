@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Vintagestory.API.Server;
 using TradeRoutesDeluxe.Common.Network;
@@ -65,9 +65,9 @@ namespace TradeRoutesDeluxe.Common {
             foreach (KeyValuePair<string, TradingPostLocation> location in this.networks[networkId].Locations) {
                 if (location.Value.PostId == originBlockId || slotBytes == null) continue;
                 if (System.ClientAPI != null) {
-                    System.ClientAPI.Network.SendBlockEntityPacket(location.Value.BlockPosition.X, location.Value.BlockPosition.Y, location.Value.BlockPosition.Z, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
+                    System.ClientAPI.Network.SendBlockEntityPacket(location.Value.BlockPosition, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
                 } else {
-                    System.ServerAPI.Network.BroadcastBlockEntityPacket(location.Value.BlockPosition.X, location.Value.BlockPosition.Y, location.Value.BlockPosition.Z, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
+                    System.ServerAPI.Network.BroadcastBlockEntityPacket(location.Value.BlockPosition, (int)EnumTradingPostPackets.SyncInventory, slotBytes);
                 }
             };
         }

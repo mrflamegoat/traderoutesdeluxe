@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Client (Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "D:/Games/Vintagestory/Vintagestory.exe",
+            "preLaunchTask": "build",
+            "args": [
+                "--tracelog",
+                "--addModPath",
+                "${workspaceFolder}/TradeRoutesDeluxe/bin/Debug/Mods",
+                "--addOrigin",
+                "${workspaceFolder}/TradeRoutesDeluxe/assets"
+            ],
+            "cwd": "D:/Games/Vintagestory",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Launch Server",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "D:/Games/Vintagestory/VintagestoryServer.exe",
+            "preLaunchTask": "build",
+            "args": [
+                "--tracelog",
+                "--addModPath",
+                "${workspaceFolder}/TradeRoutesDeluxe/bin/Debug/Mods",
+                "--addOrigin",
+                "${workspaceFolder}/TradeRoutesDeluxe/assets"
+            ],
+            "cwd": "D:/Games/Vintagestory",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
