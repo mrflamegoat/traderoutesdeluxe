@@ -7,15 +7,20 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <VintagestoryDir Condition="'$(VINTAGE_STORY)' != ''">$(VINTAGE_STORY)</VintagestoryDir>
+    <VintagestoryDir Condition="'$(VintagestoryDir)' == '' AND '$(OS)' == 'Windows_NT'">$(registry:HKEY_CURRENT_USER\Environment@VINTAGE_STORY)</VintagestoryDir>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Cake.Frosting" Version="6.1.0" />
+    <PackageReference Include="Cake.Frosting" Version="6.3.0" />
     <PackageReference Include="Cake.Json" Version="7.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="VintagestoryAPI">
-      <HintPath>$(VINTAGE_STORY)\VintagestoryAPI.dll</HintPath>
+      <HintPath>$(VintagestoryDir)\VintagestoryAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
 

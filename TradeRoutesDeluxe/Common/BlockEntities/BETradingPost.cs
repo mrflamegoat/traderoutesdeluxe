@@ -1,76 +1,93 @@
-﻿using System;
+using System;
 using TradeRoutesDeluxe.Common.Items;
 using TradeRoutesDeluxe.Common.Network;
-using Vintagestory.API.Server;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
+using Vintagestory.API.Server;
 using Vintagestory.GameContent;
-using TradeRoutesDeluxe.Common.Utils;
 
 namespace TradeRoutesDeluxe.Common.BlockEntities {
 
-    public class BlockEntityTradingPost : BlockEntityGenericContainer {
+    public class BlockEntityTradingPost : BlockEntityOpenableContainer {
+
+        public int quantitySlots = 16;
+        public string inventoryClassName = TradeRoutesHandler.InventoryClassName;
 
         private string blockEnityId;
-
-        internal InventoryGeneric inventory;
-
         private string networkId;
 
-        public string DialogTitle {
+        private InventoryGeneric unlinkedInventory;
+
+        private InventoryBase subscribedInventory;
+
+        public static string DialogTitle {
             get { return Lang.Get("block-tradingpost"); }
         }
 
         public override InventoryBase Inventory {
-            get { return inventory; }
+            get {
+                if (networkId != null) {
+                    InventoryGeneric shared = Handler?.GetOrCreateInventory(networkId, quantitySlots, Api);
+                    if (shared != null) return shared;
+                }
+
+                return unlinkedInventory;
+            }
         }
 
         public override string InventoryClassName {
             get { return inventoryClassName; }
         }
 
-        public BlockEntityTradingPost() : base() { }
-
-        public override void Initialize(ICoreAPI api) {
-            // No inventory? New block, create it!
-            if (inventory == null) {
-                InitInventory(Block);
-            }
-
-            // No blockEntityId? New block, create it!
-            if (this.blockEnityId == null) {
-                this.blockEnityId = Guid.NewGuid().ToString();
-            }
-
-            // Oh ffs read the above two comments.
-            if (this.networkId != null) {
-                // Block exists and has a network, load up it's inventory.
-                this.SyncFromNetworkInventory(api);
-            }
-
-            base.Initialize(api);
+        private TradeRoutesHandler Handler {
+            get { return Api?.ModLoader.GetModSystem<TradeRoutesSystem>()?.TradeRoutesHandler; }
         }
 
-        // Black magic, don't touch.
-        public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving) {
-            if (inventory == null) {
-                if (tree.HasAttribute("forBlockId")) {
-                    InitInventory(worldForResolving.GetBlock((ushort)tree.GetInt("forBlockId")));
-                } else if (tree.HasAttribute("forBlockCode")) {
-                    InitInventory(worldForResolving.GetBlock(new AssetLocation(tree.GetString("forBlockCode"))));
+        public BlockEntityTradingPost() : base() {
+            unlinkedInventory = new InventoryGeneric(quantitySlots, null, null, null);
+        }
+
+        public override void Initialize(ICoreAPI api) {
+            if (Block?.Attributes != null) {
+                inventoryClassName = Block.Attributes["inventoryClassName"].AsString(inventoryClassName);
+                quantitySlots = Block.Attributes["quantitySlots"].AsInt(quantitySlots);
+
+                if (unlinkedInventory.Count != quantitySlots && unlinkedInventory.Empty) {
+                    unlinkedInventory = new InventoryGeneric(quantitySlots, null, null, null);
                 }
             }
 
-            this.networkId = tree.GetString("networkId");
-            this.blockEnityId = tree.GetString("blockEntityId");
+            if (blockEnityId == null) blockEnityId = Guid.NewGuid().ToString();
+
+            base.Initialize(api);
+
+            Inventory.OnInventoryOpened -= OnInventoryOpened;
+            Inventory.OnInventoryClosed -= OnInventoryClosed;
+
+            if (networkId != null) AttachToNetwork();
+
+            SubscribeTo(Inventory);
+        }
+
+        public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving) {
+            networkId = tree.GetString("networkId");
+            blockEnityId = tree.GetString("blockEntityId");
+
+            if (networkId != null) tree.RemoveAttribute("inventory");
+
             base.FromTreeAttributes(tree, worldForResolving);
         }
 
         public override void ToTreeAttributes(ITreeAttribute tree) {
-            tree.SetString("networkId", this.networkId);
-            tree.SetString("blockEntityId", this.blockEnityId);
             base.ToTreeAttributes(tree);
+
+            if (networkId != null) {
+                tree.RemoveAttribute("inventory");
+                tree.SetString("networkId", networkId);
+            }
+
+            if (blockEnityId != null) tree.SetString("blockEntityId", blockEnityId);
         }
 
         public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel) {
@@ -78,129 +95,173 @@ namespace TradeRoutesDeluxe.Common.BlockEntities {
                 ItemSlot hotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
                 if (hotbarSlot?.Itemstack?.Item is ItemPostParchmentUnwritten) {
-                    hotbarSlot.TakeOut(1);
-                    hotbarSlot.MarkDirty();
-
                     if (byPlayer.Entity.World is IServerWorldAccessor) {
-                        if (this.networkId == null) {
-                            TradingPostLocation post = new TradingPostLocation();
-                            post.PostId = this.blockEnityId;
-                            post.BlockPosition = blockSel.Position;
+                        if (networkId == null) {
+                            TradingPostLocation post = new() {
+                                PostId = blockEnityId,
+                                BlockPosition = blockSel.Position
+                            };
 
-                            this.networkId = Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.CreateOrAddLocation(byPlayer as IServerPlayer, post);
-
-                            this.SyncToNetworkInventory();
+                            LinkToNetwork(Handler.CreateOrAddLocation(byPlayer as IServerPlayer, post));
                         }
+
+                        if (networkId == null) return false;
+
+                        hotbarSlot.TakeOut(1);
+                        hotbarSlot.MarkDirty();
 
                         ItemPostParchmentWritten writtenPaper = byPlayer.Entity.World.GetItem(new AssetLocation("traderoutesdeluxe:post_parchment_written")) as ItemPostParchmentWritten;
 
-                        ItemStack stack = new ItemStack(writtenPaper, 1);
+                        ItemStack stack = new(writtenPaper, 1);
                         stack.Attributes.SetString("networkId", networkId);
 
                         if (!byPlayer.InventoryManager.TryGiveItemstack(stack, true)) {
                             byPlayer.Entity.World.SpawnItemEntity(stack, byPlayer.Entity.Pos.XYZ.Add(0, 0.5, 0));
                         }
-
-                        return true;
                     }
+
+                    return true;
                 }
 
                 if (hotbarSlot?.Itemstack?.Item is ItemPostParchmentWritten) {
-                    this.networkId = hotbarSlot.Itemstack.Attributes.GetString("networkId");
-                    if (this.networkId == null) return false;
+                    string incomingNetworkId = hotbarSlot.Itemstack.Attributes.GetString("networkId");
+                    if (incomingNetworkId == null) return false;
 
                     if (byPlayer.Entity.World is IServerWorldAccessor) {
-                        TradingPostLocation post = new TradingPostLocation();
-                        post.PostId = this.blockEnityId;
-                        post.BlockPosition = blockSel.Position;
-                        Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.CreateOrAddLocation(byPlayer as IServerPlayer, post, this.networkId);
-                    }
+                        TradingPostLocation post = new() {
+                            PostId = blockEnityId,
+                            BlockPosition = blockSel.Position
+                        };
 
-                    this.SyncFromNetworkInventory(Api);
+                        string joinedNetworkId = Handler.CreateOrAddLocation(byPlayer as IServerPlayer, post, incomingNetworkId);
+
+                        if (joinedNetworkId == null) {
+                            joinedNetworkId = Handler.CreateOrAddLocation(byPlayer as IServerPlayer, post);
+
+                            hotbarSlot.Itemstack.Attributes.SetString("networkId", joinedNetworkId);
+                            hotbarSlot.MarkDirty();
+                        }
+
+                        LinkToNetwork(joinedNetworkId);
+                    }
 
                     return true;
                 }
             } else {
-                if (this.networkId != null && Api.World is IServerWorldAccessor) {
-                    byte[] localInventory = ByteBuilder.InventoryByteBuilder(this.inventory, "BlockEntityTradingPost", DialogTitle);
+                if (Api.World is IServerWorldAccessor) {
+                    byte[] data = BlockEntityContainerOpen.ToBytes("BlockEntityInventory", DialogTitle, 4, Inventory);
 
                     ((ICoreServerAPI)Api).Network.SendBlockEntityPacket(
                         (IServerPlayer)byPlayer,
                         Pos,
                         (int)EnumBlockContainerPacketId.OpenInventory,
-                        localInventory
+                        data
                     );
 
-                    byPlayer.InventoryManager.OpenInventory(this.inventory);
+                    byPlayer.InventoryManager.OpenInventory(Inventory);
                 }
             }
 
             return true;
         }
 
-        public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data) {
-            if (packetid == (int)EnumTradingPostPackets.SyncInventory) {
-                handleNeutralPackets(packetid, data);
-            }
-
-            base.OnReceivedClientPacket(player, packetid, data);
-        }
-
-        public override void OnReceivedServerPacket(int packetid, byte[] data) {
-            if (packetid == (int)EnumTradingPostPackets.SyncInventory) {
-                handleNeutralPackets(packetid, data);
-                MarkDirty();
-            }
-
-            base.OnReceivedServerPacket(packetid, data);
-        }
-
         public override void OnBlockBroken(IPlayer byPlayer = null) {
-            Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.RemoveTradingPost(this.blockEnityId, this.networkId);
-            Inventory.DiscardAll();
+            if (networkId != null) {
+                InventoryBase shared = Inventory;
+                bool wasLastPost = Handler?.RemoveTradingPost(blockEnityId, networkId) ?? false;
+
+                if (wasLastPost && Api is ICoreServerAPI && shared != null && shared != unlinkedInventory) {
+                    shared.DropAll(Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                    Handler?.DeleteNetwork(networkId);
+                }
+
+                DetachFromNetwork();
+
+                networkId = null;
+            }
 
             base.OnBlockBroken(byPlayer);
         }
 
-        private void OnSlotModified(int slot) {
-            Api.World.BlockAccessor.GetChunkAtBlockPos(this.Pos)?.MarkModified();
-            this.SyncToNetworkInventory();
+        public override void OnBlockUnloaded() {
+            DetachFromNetwork();
+
+            base.OnBlockUnloaded();
         }
 
-        private void InitInventory(Block Block) {
-            // Ripped right out of the SurvivalMod code.
-            this.inventory = new InventoryGeneric(quantitySlots, null, null, null);
+        public override void OnBlockRemoved() {
+            DetachFromNetwork();
 
-            this.inventory.OnInventoryClosed += OnInvClosed;
-            this.inventory.OnInventoryOpened += OnInvOpened;
-            this.inventory.SlotModified += OnSlotModified;
+            base.OnBlockRemoved();
         }
 
-        private void handleNeutralPackets(int packetid, byte[] data) {
-            switch (packetid) {
-                case (int)EnumTradingPostPackets.SyncInventory:
-                    this.SyncFromNetworkInventory(Api, data);
+        private void LinkToNetwork(string newNetworkId) {
+            if (newNetworkId == null || newNetworkId == networkId) return;
+
+            DetachFromNetwork();
+            networkId = newNetworkId;
+            AttachToNetwork();
+            SubscribeTo(Inventory);
+
+            TransferUnlinkedContents();
+            MarkDirty(true);
+        }
+
+        private void AttachToNetwork() {
+            InventoryGeneric shared = Handler?.GetOrCreateInventory(networkId, quantitySlots, Api);
+            if (shared == null) return;
+
+            shared.LateInitialize(TradeRoutesHandler.InventoryIdFor(networkId), Api);
+            shared.ResolveBlocksOrItems();
+
+        }
+
+        private void DetachFromNetwork() {
+            UnsubscribeCurrent();
+        }
+
+        private void SubscribeTo(InventoryBase inventory) {
+            if (inventory == null || inventory == subscribedInventory) return;
+
+            UnsubscribeCurrent();
+
+            inventory.OnInventoryOpened += OnInventoryOpened;
+            inventory.OnInventoryClosed += OnInventoryClosed;
+            inventory.OnInventoryClosed += DisposeDialog;
+
+            subscribedInventory = inventory;
+        }
+
+        private void UnsubscribeCurrent() {
+            if (subscribedInventory == null) return;
+
+            subscribedInventory.OnInventoryOpened -= OnInventoryOpened;
+            subscribedInventory.OnInventoryClosed -= OnInventoryClosed;
+            subscribedInventory.OnInventoryClosed -= DisposeDialog;
+
+            subscribedInventory = null;
+        }
+
+        private void DisposeDialog(IPlayer player) {
+            invDialog?.Dispose();
+            invDialog = null;
+        }
+
+        private void TransferUnlinkedContents() {
+            InventoryBase shared = Inventory;
+            if (shared == null || shared == unlinkedInventory || Api?.World == null) return;
+
+            for (int i = 0; i < unlinkedInventory.Count; i++) {
+                ItemSlot source = unlinkedInventory[i];
+                if (source.Empty) continue;
+
+                for (int j = 0; j < shared.Count; j++) {
+                    if (!shared[j].Empty) continue;
+
+                    source.TryPutInto(Api.World, shared[j], source.StackSize);
                     break;
-                default:
-                    break;
+                }
             }
-        }
-
-        // Pass API here because we attempt to use this before it's initialized to the blockentity.
-        private void SyncFromNetworkInventory(ICoreAPI api, byte[] data = null) {
-            byte[] serializedItems = data ?? null;
-            if (serializedItems == null) {
-                serializedItems = api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.GetTree(this.networkId);
-            }
-            if (serializedItems == null) return;
-
-            Inventory.FromTreeAttributes(TreeAttribute.CreateFromBytes(serializedItems));
-        }
-
-        protected void SyncToNetworkInventory() {
-            TreeAttribute tree = new TreeAttribute();
-            Inventory.ToTreeAttributes(tree);
-            Api.ModLoader.GetModSystem<TradeRoutesSystem>().TradeRoutesHandler.SyncInventories(this.blockEnityId, this.networkId, tree.ToBytes());
         }
     }
 }

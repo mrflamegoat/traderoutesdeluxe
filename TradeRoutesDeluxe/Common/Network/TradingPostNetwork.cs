@@ -11,8 +11,5 @@ namespace TradeRoutesDeluxe.Common.Network {
 
         [ProtoMember(2)]
         public Dictionary<string, TradingPostLocation> Locations;
-
-        [ProtoMember(3)]
-        public byte[] slots;
     }
 }
